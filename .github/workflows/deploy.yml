@@ -29,7 +29,7 @@ jobs:
     chmod 600 ec2_key.pem
 
     # Connect to the EC2 instance and deploy the app
-    ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@<EC2_PUBLIC_IP> << 'EOF'
+    ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@<54.226.133.84> << 'EOF'
       # Navigate to the application directory
       cd /path/to/application
 
