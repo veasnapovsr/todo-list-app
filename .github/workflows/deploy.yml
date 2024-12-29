@@ -20,12 +20,27 @@ jobs:
       run: docker-compose build
 
     - name: Deploy to EC2
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
-      run: |
-        ssh -i ~/.ssh/key.pem ec2-user@$EC2_PUBLIC_IP << 'EOF'
-        cd todo-list-app
-        docker-compose pull
-        docker-compose up -d
-        EOF
+  run: |
+    # Add deployment steps to your EC2 instance
+    echo "Starting deployment"
+
+    # Save the private key to a file
+    echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+    chmod 600 ec2_key.pem
+
+    # Connect to the EC2 instance and deploy the app
+    ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@<EC2_PUBLIC_IP> << 'EOF'
+      # Navigate to the application directory
+      cd /path/to/application
+
+      # Pull the latest changes (if the repo is already cloned)
+      git pull origin main
+
+      # Rebuild and restart the Docker containers
+      docker-compose down
+      docker-compose up -d
+    EOF
+
+    # Clean up
+    rm ec2_key.pem
+
