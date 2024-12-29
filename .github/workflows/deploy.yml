@@ -26,5 +26,46 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          # Add deployment steps to your EC2 instance here
-          echo "Deployment logic"
+          - name: Deploy to EC2
+  run: |
+   name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main  # Run this workflow when code is pushed to the 'main' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code from GitHub repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Save SSH key
+      - name: Add SSH key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+
+      # Step 3: Deploy to EC2 instance
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+            # Navigate to the application directory
+            cd /path/to/your/app
+
+            # Pull latest code
+            git pull origin main
+
+            # Rebuild and restart Docker containers
+            docker-compose down
+            docker-compose up -d
+          EOF
+
+      # Step 4: Clean up SSH key
+      - name: Clean up
+        run: rm ec2_key.pem
+
